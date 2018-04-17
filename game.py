@@ -1,9 +1,10 @@
 from minesweeper import Minesweeper
 import launchpad_py as launchpad
 import time
+from copy import copy, deepcopy
 
 SIZE = 8
-N_MINE = 15
+N_MINE = 10
 TIMEOUT = 0.010
 color_map = {'.': 3, 'M': 72, '!': 95, 0: 0, 1: 67, 2: 21, 3: 13, 4: 52, 5: 78, 6: 48, 7: 108, 8: 5}
 
@@ -11,6 +12,7 @@ color_map = {'.': 3, 'M': 72, '!': 95, 0: 0, 1: 67, 2: 21, 3: 13, 4: 52, 5: 78, 
 class Game:
     def __init__(self):
         self.sweeper = None
+        self.old_board = None
         self.lp = launchpad.LaunchpadMk2()
         if not self.lp.Open():
             print("Error opening LaunchpadMK2")
@@ -20,7 +22,9 @@ class Game:
     def start(self):
         self.sweeper = Minesweeper(SIZE, N_MINE)
         self.sweeper.start()
-        # self.print_board()
+        self.sweeper.print_board()
+        self.old_board = [[None for _ in range(SIZE)] for _ in range(SIZE)]
+        self.set_color_bar()
         while True:
             self.print_visible()
             x, y = self.read_button()
@@ -29,6 +33,7 @@ class Game:
             if not (0 <= x < SIZE and 0 <= y < SIZE):
                 print("FUCKOFF")
                 continue
+            self.old_board = deepcopy(self.sweeper.is_visible)
             status = self.choose(x, y)
             print("status", status)
             if self.sweeper.status == 'G':
@@ -53,10 +58,12 @@ class Game:
 
     def print_visible(self):
         bd = self.sweeper.board
-        self.lp.LedAllOn(0)
-        self.set_color_bar()
+        # self.lp.LedAllOn(0)
+        # self.set_color_bar()
         for i in range(SIZE):
             for j in range(SIZE):
+                if self.sweeper.is_visible[i][j] == self.old_board[i][j]:
+                    continue
                 pp = '.'
                 if self.sweeper.is_visible[i][j]:
                     pp = bd[i][j]
