@@ -3,8 +3,8 @@ import launchpad_py as launchpad
 import time
 
 SIZE = 8
-N_MINE = 10
-TIMEOUT = 0.025
+N_MINE = 15
+TIMEOUT = 0.010
 color_map = {'.': 3, 'M': 72, '!': 95, 0: 0, 1: 67, 2: 21, 3: 13, 4: 52, 5: 78, 6: 48, 7: 108, 8: 5}
 
 
@@ -26,6 +26,9 @@ class Game:
             x, y = self.read_button()
             y -= 1
             print("you choose", x, y)
+            if not (0 <= x < SIZE and 0 <= y < SIZE):
+                print("FUCKOFF")
+                continue
             status = self.choose(x, y)
             print("status", status)
             if self.sweeper.status == 'G':
